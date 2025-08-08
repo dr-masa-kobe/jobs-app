@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"/><title>求人プレビュー</title>
+<link rel="stylesheet" href="/public/styles.css"></head>
+<body>
+  <a href="/">← 一覧へ</a>
+  <article>
+    <h1 id="title"></h1>
+    <p><b>勤務地:</b> <span id="location"></span> / <b>給与:</b> <span id="salary"></span></p>
+    <p><b>状態:</b> <span id="status"></span> / <b>区分:</b> <span id="employment_type"></span></p>
+    <p id="tags"></p>
+    <pre id="description"></pre>
+
+    <h3>画像</h3>
+    <div id="images" class="images"></div>
+    <hr/>
+    <button id="editHere">このページで本文を編集</button>
+    <section id="inlineEdit" hidden>
+      <textarea id="editDesc" rows="10" style="width:100%"></textarea>
+      <button id="saveDesc">保存</button>
+    </section>
+  </article>
+  <script type="module">
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    async function load() {
+      const res = await fetch(`/api/jobs?q=${encodeURIComponent(id)}&sort=updated_at&dir=desc`);
+      const { data } = await res.json();
+      const job = data.find(j => j.id === id);
+      if (!job) { document.body.innerHTML = 'Not found'; return; }
+      title.textContent = job.title;
+      location.textContent = job.location || '';
+      salary.textContent = job.salary || '';
+      status.textContent = job.status;
+      employment_type.textContent = job.employment_type || '';
+      tags.textContent = (JSON.parse(job.tags||'[]')).map(t=>`#${t}`).join(' ');
+      description.textContent = job.description || '';
+
+      // 画像一覧
+      const imgRes = await fetch(`/api/images?jobId=${encodeURIComponent(id)}`);
+      const { keys } = await imgRes.json();
+      images.innerHTML = '';
+      for (const key of keys) {
+        const url = `/api/images/${encodeURIComponent(key)}`;
+        const a = document.createElement('a');
+        a.href = url; a.textContent = key.split('/').pop(); a.download = '';
+        const img = document.createElement('img');
+        img.src = url; img.alt = key; img.style.maxHeight = '120px';
+        const wrap = document.createElement('div'); wrap.className = 'imgwrap';
+        wrap.appendChild(img); wrap.appendChild(a);
+        images.appendChild(wrap);
+      }
+
+      editHere.onclick = () => {
+        inlineEdit.hidden = false;
+        editDesc.value = job.description || '';
+      };
+      saveDesc.onclick = async () => {
+        const payload = { ...job, description: editDesc.value };
+        await fetch('/api/jobs', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        alert('保存しました'); location.reload();
+      };
+    }
+    load();
+  </script>
+</body>
+</html>
