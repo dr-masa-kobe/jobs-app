@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>求人一覧</title>
+  <link rel="stylesheet" href="/public/styles.css">
+</head>
+<body>
+  <header>
+    <h1>求人一覧</h1>
+    <input id="q" placeholder="検索（ID/タイトル/勤務地/本文）">
+    <select id="status">
+      <option value="">すべて</option>
+      <option value="open">公開中</option>
+      <option value="draft">下書き</option>
+      <option value="closed">クローズ</option>
+    </select>
+    <button id="exportCsv">CSVエクスポート</button>
+    <button id="newJob">新規作成</button>
+  </header>
+
+  <table id="jobsTable">
+    <thead>
+      <tr>
+        <th data-col="title">タイトル</th>
+        <th data-col="location">勤務地</th>
+        <th data-col="salary">給与</th>
+        <th data-col="employment_type">区分</th>
+        <th data-col="status">状態</th>
+        <th data-col="updated_at">更新</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <dialog id="editDlg">
+    <form id="editForm" method="dialog">
+      <input name="id" type="hidden">
+      <label>タイトル<input name="title" required></label>
+      <label>勤務地<input name="location"></label>
+      <label>給与<input name="salary"></label>
+      <label>区分<input name="employment_type" placeholder="part/fullなど"></label>
+      <label>状態
+        <select name="status">
+          <option>open</option><option>draft</option><option>closed</option>
+        </select>
+      </label>
+      <label>タグ（カンマ区切り）<input name="tags"></label>
+      <label>本文<textarea name="description" rows="6"></textarea></label>
+      <div class="row">
+        <input type="file" id="imgFile">
+        <button id="uploadImg">画像アップ</button>
+      </div>
+      <menu>
+        <button value="cancel">キャンセル</button>
+        <button id="saveBtn" value="default">保存</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="/frontend/app.js" type="module"></script>
+</body>
+</html>
